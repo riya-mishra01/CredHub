@@ -1,0 +1,1919 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CredHub - Micro-Credential Aggregator Platform</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary-color: #4F46E5;
+            --secondary-color: #10B981;
+            --accent-color: #F59E0B;
+            --dark-color: #1F2937;
+            --light-color: #F3F4F6;
+            --text-color: #374151;
+            --border-radius: 12px;
+            --danger-color: #EF4444;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            line-height: 1.6;
+            color: var(--text-color);
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 0 20px;
+        }
+
+        /* Navigation */
+        nav {
+            background: rgba(255, 255, 255, 0.95);
+            backdrop-filter: blur(10px);
+            box-shadow: 0 2px 20px rgba(0, 0, 0, 0.1);
+            position: sticky;
+            top: 0;
+            z-index: 1000;
+        }
+
+        .nav-container {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 1rem 2rem;
+        }
+
+        .logo {
+            display: flex;
+            align-items: center;
+            font-size: 1.5rem;
+            font-weight: bold;
+            color: var(--primary-color);
+            cursor: pointer;
+        }
+
+        .logo-icon {
+            width: 40px;
+            height: 40px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            margin-right: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+
+        .nav-links {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+        }
+
+        .nav-link {
+            color: var(--text-color);
+            text-decoration: none;
+            font-weight: 500;
+            transition: color 0.3s;
+            cursor: pointer;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            color: var(--primary-color);
+        }
+
+        .btn {
+            padding: 10px 24px;
+            border: none;
+            border-radius: var(--border-radius);
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-primary {
+            background: var(--primary-color);
+            color: white;
+        }
+
+        .btn-primary:hover {
+            background: #4338CA;
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(79, 70, 229, 0.3);
+        }
+
+        .btn-secondary {
+            background: var(--secondary-color);
+            color: white;
+        }
+
+        .btn-secondary:hover {
+            background: #059669;
+        }
+
+        .btn-outline {
+            background: transparent;
+            border: 2px solid var(--primary-color);
+            color: var(--primary-color);
+        }
+
+        .btn-danger {
+            background: var(--danger-color);
+            color: white;
+        }
+
+        .btn-small {
+            padding: 6px 12px;
+            font-size: 0.85rem;
+        }
+
+        /* Page Content */
+        .page-content {
+            min-height: calc(100vh - 80px);
+            padding: 2rem 0;
+        }
+
+        .page {
+            display: none;
+            animation: fadeIn 0.5s;
+        }
+
+        .page.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        /* Hero Section */
+        .hero {
+            background: white;
+            border-radius: 20px;
+            padding: 4rem;
+            margin: 2rem 0;
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.1);
+        }
+
+        .hero-content {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 4rem;
+            align-items: center;
+        }
+
+        .hero-text h1 {
+            font-size: 3rem;
+            color: var(--dark-color);
+            margin-bottom: 1rem;
+            line-height: 1.2;
+        }
+
+        .hero-text .highlight {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .hero-buttons {
+            display: flex;
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .hero-image {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: 20px;
+            height: 400px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hero-image::before {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: repeating-linear-gradient(
+                45deg,
+                transparent,
+                transparent 10px,
+                rgba(255, 255, 255, 0.1) 10px,
+                rgba(255, 255, 255, 0.1) 20px
+            );
+            animation: slide 20s linear infinite;
+        }
+
+        @keyframes slide {
+            0% { transform: translate(-50%, -50%); }
+            100% { transform: translate(0, 0); }
+        }
+
+        /* Features */
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 2rem;
+            margin: 4rem 0;
+        }
+
+        .feature-card {
+            background: white;
+            border-radius: var(--border-radius);
+            padding: 2rem;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .feature-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .feature-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+        }
+
+        /* Dashboard */
+        .dashboard {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 2rem;
+        }
+
+        .stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            color: white;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            opacity: 0.9;
+        }
+
+        /* Credentials */
+        .credentials-header {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+
+        .credentials-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 2rem;
+            margin: 2rem 0;
+        }
+
+        .credential-card {
+            background: white;
+            border-radius: var(--border-radius);
+            overflow: hidden;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+            transition: transform 0.3s;
+        }
+
+        .credential-card:hover {
+            transform: translateY(-5px);
+        }
+
+        .credential-header {
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            color: white;
+            padding: 1.5rem;
+        }
+
+        .credential-body {
+            padding: 1.5rem;
+        }
+
+        .credential-meta {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 1rem;
+            padding-top: 1rem;
+            border-top: 1px solid var(--light-color);
+        }
+
+        .badge {
+            display: inline-block;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 0.85rem;
+            font-weight: 600;
+        }
+
+        .badge-verified {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .badge-pending {
+            background: #FEF3C7;
+            color: #92400E;
+        }
+
+        /* Upload Section */
+        .upload-section {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: var(--border-radius);
+            padding: 3rem;
+            text-align: center;
+            background: #F9FAFB;
+            cursor: pointer;
+            transition: all 0.3s;
+        }
+
+        .upload-area:hover {
+            background: #F3F4F6;
+            border-color: var(--secondary-color);
+        }
+
+        /* DigiLocker Section */
+        .digilocker-section {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+        }
+
+        .digilocker-header {
+            display: flex;
+            align-items: center;
+            gap: 2rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .digilocker-logo {
+            width: 180px;
+            height: 70px;
+            background: linear-gradient(135deg, #FF6B6B, #4ECDC4);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.3rem;
+            font-weight: bold;
+            gap: 10px;
+        }
+
+        .digilocker-status {
+            flex: 1;
+        }
+
+        .status-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 8px 16px;
+            border-radius: 20px;
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .status-connected {
+            background: #D1FAE5;
+            color: #065F46;
+        }
+
+        .status-disconnected {
+            background: #FEE2E2;
+            color: #991B1B;
+        }
+
+        .digilocker-stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .digi-stat-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            color: white;
+            text-align: center;
+        }
+
+        .digi-stat-value {
+            font-size: 2rem;
+            font-weight: bold;
+        }
+
+        .digilocker-docs {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+            gap: 1.5rem;
+            margin: 2rem 0;
+        }
+
+        .doc-card {
+            background: #F9FAFB;
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            cursor: pointer;
+            transition: all 0.3s;
+            border: 2px solid transparent;
+        }
+
+        .doc-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(0, 0, 0, 0.1);
+        }
+
+        .doc-card.verified {
+            background: #D1FAE5;
+            border-color: var(--secondary-color);
+        }
+
+        .doc-icon {
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.2rem;
+            flex-shrink: 0;
+        }
+
+        .doc-info {
+            flex: 1;
+        }
+
+        .doc-name {
+            font-weight: 600;
+            color: var(--dark-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .doc-status {
+            font-size: 0.85rem;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .doc-status.pending {
+            color: var(--accent-color);
+        }
+
+        .doc-status.verified {
+            color: var(--secondary-color);
+        }
+
+        .doc-number {
+            font-size: 0.8rem;
+            color: var(--text-color);
+            margin-top: 0.25rem;
+        }
+
+        .doc-action {
+            flex-shrink: 0;
+        }
+
+        /* Profile Page */
+        .profile-container {
+            background: white;
+            border-radius: 20px;
+            padding: 3rem;
+            margin: 2rem 0;
+        }
+
+        .profile-header {
+            display: flex;
+            gap: 2rem;
+            align-items: center;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .profile-avatar {
+            width: 120px;
+            height: 120px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2.5rem;
+            font-weight: bold;
+        }
+
+        .profile-info h2 {
+            color: var(--dark-color);
+            margin-bottom: 0.25rem;
+        }
+
+        .profile-details {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .detail-group {
+            border: 1px solid var(--light-color);
+            border-radius: var(--border-radius);
+            padding: 1.5rem;
+        }
+
+        .detail-group h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            font-size: 1rem;
+        }
+
+        .edit-btn {
+            background: var(--light-color);
+            border: none;
+            color: var(--primary-color);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 6px 12px;
+            border-radius: 6px;
+            transition: background 0.3s;
+        }
+
+        .edit-btn:hover {
+            background: #E5E7EB;
+        }
+
+        .detail-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 0.5rem 0;
+            border-bottom: 1px solid var(--light-color);
+            font-size: 0.95rem;
+        }
+
+        .detail-item:last-child {
+            border-bottom: none;
+        }
+
+        .detail-label {
+            font-weight: 500;
+            color: var(--text-color);
+        }
+
+        .detail-value {
+            color: var(--dark-color);
+        }
+
+        .detail-value input {
+            width: 120px;
+            padding: 4px 8px;
+            border: 2px solid var(--primary-color);
+            border-radius: 6px;
+            font-size: 0.9rem;
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            z-index: 2000;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            max-width: 450px;
+            width: 100%;
+            max-height: 90vh;
+            overflow-y: auto;
+            position: relative;
+            animation: modalSlideIn 0.3s ease;
+        }
+
+        @keyframes modalSlideIn {
+            from { transform: translateY(-50px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+
+        .modal-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: var(--light-color);
+            border: none;
+            font-size: 1.5rem;
+            cursor: pointer;
+            color: var(--text-color);
+            width: 35px;
+            height: 35px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-close:hover {
+            background: #E5E7EB;
+        }
+
+        .modal-header {
+            text-align: center;
+            margin-bottom: 1.5rem;
+        }
+
+        .modal-header h2 {
+            color: var(--dark-color);
+            margin-bottom: 0.5rem;
+        }
+
+        .modal-header p {
+            color: var(--text-color);
+        }
+
+        .modal-icon {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            margin: 0 auto 1rem;
+        }
+
+        /* Auth Tabs */
+        .auth-tabs {
+            display: flex;
+            margin-bottom: 1.5rem;
+            border-bottom: 2px solid var(--light-color);
+        }
+
+        .auth-tab {
+            flex: 1;
+            padding: 1rem;
+            background: none;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            color: var(--text-color);
+            position: relative;
+            transition: color 0.3s;
+        }
+
+        .auth-tab.active {
+            color: var(--primary-color);
+        }
+
+        .auth-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: -2px;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary-color);
+        }
+
+        /* Form Styles */
+        .form-group {
+            margin-bottom: 1.25rem;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 0.5rem;
+            font-weight: 600;
+            color: var(--dark-color);
+            font-size: 0.95rem;
+        }
+
+        .form-group input,
+        .form-group select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid var(--light-color);
+            border-radius: 8px;
+            font-size: 1rem;
+            transition: border-color 0.3s;
+        }
+
+        .form-group input:focus,
+        .form-group select:focus {
+            outline: none;
+            border-color: var(--primary-color);
+        }
+
+        .form-group small {
+            display: block;
+            margin-top: 0.25rem;
+            color: var(--text-color);
+            font-size: 0.8rem;
+        }
+
+        .form-group .error {
+            color: var(--danger-color);
+            font-size: 0.85rem;
+            margin-top: 0.25rem;
+        }
+
+        .otp-section {
+            display: none;
+            margin-top: 1rem;
+            padding: 1rem;
+            background: #F0FDF4;
+            border-radius: 8px;
+            border: 1px solid var(--secondary-color);
+        }
+
+        .otp-section.active {
+            display: block;
+        }
+
+        .otp-info {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 1rem;
+            color: var(--secondary-color);
+            font-weight: 500;
+        }
+
+        /* Developer Credit */
+        .developer-credit {
+            background: white;
+            border-radius: 20px;
+            padding: 2rem;
+            margin: 2rem 0;
+            text-align: center;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        }
+
+        .developer-credit h3 {
+            color: var(--primary-color);
+            margin-bottom: 1rem;
+        }
+
+        .developer-info {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 1rem;
+        }
+
+        .developer-avatar {
+            width: 60px;
+            height: 60px;
+            background: linear-gradient(135deg, var(--primary-color), var(--secondary-color));
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 1.5rem;
+            font-weight: bold;
+        }
+
+        /* Mobile Menu */
+        .mobile-menu-toggle {
+            display: none;
+            flex-direction: column;
+            gap: 4px;
+            cursor: pointer;
+            padding: 5px;
+        }
+
+        .mobile-menu-toggle span {
+            width: 25px;
+            height: 3px;
+            background: var(--dark-color);
+            border-radius: 3px;
+        }
+
+        /* Toast Notification */
+        .toast {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: var(--dark-color);
+            color: white;
+            padding: 1rem 1.5rem;
+            border-radius: 10px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+            display: none;
+            align-items: center;
+            gap: 10px;
+            z-index: 3000;
+            animation: slideInRight 0.3s ease;
+        }
+
+        .toast.active {
+            display: flex;
+        }
+
+        .toast.success {
+            background: var(--secondary-color);
+        }
+
+        .toast.error {
+            background: var(--danger-color);
+        }
+
+        @keyframes slideInRight {
+            from { transform: translateX(100%); opacity: 0; }
+            to { transform: translateX(0); opacity: 1; }
+        }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .mobile-menu-toggle {
+                display: flex;
+            }
+
+            .nav-links {
+                position: absolute;
+                top: 100%;
+                left: 0;
+                right: 0;
+                background: white;
+                flex-direction: column;
+                padding: 1rem;
+                box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+                display: none;
+                gap: 1rem;
+            }
+
+            .nav-links.active {
+                display: flex;
+            }
+
+            .hero-content {
+                grid-template-columns: 1fr;
+                text-align: center;
+            }
+
+            .hero-text h1 {
+                font-size: 2rem;
+            }
+
+            .hero-buttons {
+                justify-content: center;
+            }
+
+            .hero-image {
+                height: 250px;
+            }
+
+            .credentials-grid,
+            .digilocker-docs {
+                grid-template-columns: 1fr;
+            }
+
+            .profile-header {
+                justify-content: center;
+                text-align: center;
+            }
+        }
+    </style>
+</head>
+<body>
+    <!-- Toast Notification -->
+    <div class="toast" id="toast">
+        <i class="fas fa-check-circle"></i>
+        <span id="toastMessage">Success!</span>
+    </div>
+
+    <!-- Navigation -->
+    <nav>
+        <div class="nav-container">
+            <div class="logo" onclick="showPage('home')">
+                <div class="logo-icon">
+                    <i class="fas fa-certificate"></i>
+                </div>
+                CredHub
+            </div>
+            <div class="mobile-menu-toggle" onclick="toggleMobileMenu()">
+                <span></span>
+                <span></span>
+                <span></span>
+            </div>
+            <div class="nav-links" id="navLinks">
+                <a class="nav-link active" data-page="home" onclick="showPage('home')">Home</a>
+                <a class="nav-link" data-page="dashboard" onclick="showPage('dashboard')">Dashboard</a>
+                <a class="nav-link" data-page="credentials" onclick="showPage('credentials')">My Credentials</a>
+                <a class="nav-link" data-page="digilocker" onclick="showPage('digilocker')">DigiLocker</a>
+                <a class="nav-link" data-page="profile" onclick="showPage('profile')">Profile</a>
+                <button class="btn btn-primary" id="authBtn" onclick="openAuthModal()">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Page Content -->
+    <div class="container page-content">
+        <!-- Home Page -->
+        <div id="homePage" class="page active">
+            <div class="hero">
+                <div class="hero-content">
+                    <div class="hero-text">
+                        <h1>Your <span class="highlight">Credentials</span>, One Platform</h1>
+                        <p style="font-size: 1.1rem; color: var(--text-color); margin: 1.5rem 0;">
+                            CredHub aggregates all your micro-credentials, certifications, and achievements in one secure place. Integrate with DigiLocker and manage everything seamlessly.
+                        </p>
+                        <div class="hero-buttons">
+                            <button class="btn btn-primary" onclick="openAuthModal()">
+                                <i class="fas fa-rocket"></i> Get Started
+                            </button>
+                            <button class="btn btn-outline" onclick="showPage('digilocker')">
+                                <i class="fas fa-link"></i> Connect DigiLocker
+                            </button>
+                        </div>
+                    </div>
+                    <div class="hero-image">
+                        <i class="fas fa-certificate" style="font-size: 6rem; color: white; position: relative; z-index: 1;"></i>
+                    </div>
+                </div>
+            </div>
+
+            <div class="features">
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-shield-alt"></i>
+                    </div>
+                    <h3>Secure Storage</h3>
+                    <p>Bank-level encryption ensures your credentials are always safe and secure.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-link"></i>
+                    </div>
+                    <h3>DigiLocker Integration</h3>
+                    <p>Seamlessly connect with DigiLocker to access government-issued documents.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-check-circle"></i>
+                    </div>
+                    <h3>Instant Verification</h3>
+                    <p>Verify your credentials instantly with OTP-based authentication.</p>
+                </div>
+                <div class="feature-card">
+                    <div class="feature-icon">
+                        <i class="fas fa-share-alt"></i>
+                    </div>
+                    <h3>Easy Sharing</h3>
+                    <p>Share your credentials with employers and institutions with one click.</p>
+                </div>
+            </div>
+
+            <!-- Developer Credit -->
+            <div class="developer-credit">
+                <h3><i class="fas fa-code"></i> Developed By</h3>
+                <div class="developer-info">
+                    <div class="developer-avatar">RM</div>
+                    <div style="text-align: left;">
+                        <h4 style="color: var(--dark-color); margin-bottom: 0.25rem;">Riya Mishra</h4>
+                        <p style="color: var(--text-color); font-size: 0.9rem;">Full Stack Developer</p>
+                    </div>
+                </div>
+                <p style="margin-top: 1rem; color: var(--text-color);">
+                    <i class="fas fa-heart" style="color: #EF4444;"></i> Built with passion for digital credentials management
+                </p>
+            </div>
+        </div>
+
+        <!-- Dashboard Page -->
+        <div id="dashboardPage" class="page">
+            <div class="dashboard">
+                <div class="dashboard-header">
+                    <div>
+                        <h2 style="color: var(--dark-color);">Welcome, <span id="dashboardUserName">User</span>! 👋</h2>
+                        <p style="color: var(--text-color);">Here's your credential overview</p>
+                    </div>
+                    <button class="btn btn-primary" onclick="showPage('credentials')">
+                        <i class="fas fa-plus"></i> Add Credential
+                    </button>
+                </div>
+
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">Total Credentials</div>
+                        <div class="stat-value" id="totalCredentials">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Verified Documents</div>
+                        <div class="stat-value" id="verifiedDocs">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">Pending Verification</div>
+                        <div class="stat-value" id="pendingDocs">6</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">DigiLocker Status</div>
+                        <div class="stat-value" id="digilockerStatus">Not Connected</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem; color: var(--dark-color);">Recent Credentials</h3>
+                <div class="credentials-grid" id="recentCredentials">
+                    <p style="color: var(--text-color); grid-column: 1/-1; text-align: center; padding: 2rem;">
+                        <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                        No credentials yet. Start by uploading or verifying documents!
+                    </p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Credentials Page -->
+        <div id="credentialsPage" class="page">
+            <div class="credentials-header">
+                <div>
+                    <h2 style="color: var(--dark-color);">My Credentials</h2>
+                    <p style="color: var(--text-color);">Manage all your certifications and achievements</p>
+                </div>
+                <button class="btn btn-primary" onclick="toggleUploadSection()">
+                    <i class="fas fa-upload"></i> Upload New
+                </button>
+            </div>
+
+            <div id="uploadSection" class="upload-section" style="display: none;">
+                <h3 style="margin-bottom: 1rem; color: var(--dark-color);">Upload New Credential</h3>
+                <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <i class="fas fa-cloud-upload-alt" style="font-size: 3rem; color: var(--primary-color); margin-bottom: 1rem;"></i>
+                    <h3>Drag & Drop your files here</h3>
+                    <p style="color: var(--text-color); margin: 1rem 0;">or click to browse</p>
+                    <input type="file" id="fileInput" style="display: none;" accept=".pdf,.jpg,.png" onchange="handleFileUpload(event)">
+                    <p style="color: var(--text-color); font-size: 0.85rem;">Supported: PDF, JPG, PNG (Max 10MB)</p>
+                </div>
+            </div>
+
+            <div class="credentials-grid" id="credentialsList">
+                <!-- Credentials will be added here dynamically -->
+            </div>
+        </div>
+
+        <!-- DigiLocker Page -->
+        <div id="digilockerPage" class="page">
+            <div class="digilocker-section">
+                <div class="digilocker-header">
+                    <div class="digilocker-logo">
+                        <i class="fas fa-lock"></i> DigiLocker
+                    </div>
+                    <div class="digilocker-status">
+                        <h2 style="color: var(--dark-color); margin-bottom: 0.5rem;">DigiLocker Integration</h2>
+                        <span class="status-badge" id="connectionStatus">
+                            <i class="fas fa-times-circle"></i> Not Connected
+                        </span>
+                    </div>
+                </div>
+
+                <div class="digilocker-stats">
+                    <div class="digi-stat-card">
+                        <div class="digi-stat-value">6</div>
+                        <div>Total Documents</div>
+                    </div>
+                    <div class="digi-stat-card">
+                        <div class="digi-stat-value" id="verifiedCount">0</div>
+                        <div>Verified</div>
+                    </div>
+                    <div class="digi-stat-card">
+                        <div class="digi-stat-value" id="pendingCount">6</div>
+                        <div>Pending</div>
+                    </div>
+                </div>
+
+                <h3 style="margin: 2rem 0 1rem; color: var(--dark-color);">
+                    <i class="fas fa-file-alt"></i> Your Documents
+                </h3>
+                <p style="color: var(--text-color); margin-bottom: 1.5rem;">
+                    Click on any document to verify it by entering your document number and OTP.
+                </p>
+
+                <div class="digilocker-docs" id="digilockerDocs">
+                    <!-- Documents will be rendered here -->
+                </div>
+            </div>
+        </div>
+
+        <!-- Profile Page -->
+        <div id="profilePage" class="page">
+            <div class="profile-container">
+                <div class="profile-header">
+                    <div class="profile-avatar" id="profileAvatar">GU</div>
+                    <div class="profile-info">
+                        <h2 id="profileName">Guest User</h2>
+                        <p style="color: var(--text-color);" id="profileEmail">guest@example.com</p>
+                        <p style="color: var(--text-color); font-size: 0.9rem;">Member since December 2024</p>
+                    </div>
+                </div>
+
+                <div class="profile-details">
+                    <div class="detail-group" id="personalInfo">
+                        <h3>
+                            <span><i class="fas fa-user"></i> Personal Information</span>
+                            <button class="edit-btn" onclick="toggleEdit('personalInfo')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </h3>
+                        <div class="detail-item">
+                            <span class="detail-label">Full Name</span>
+                            <span class="detail-value" data-field="fullName">Guest User</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Email</span>
+                            <span class="detail-value" data-field="email">guest@example.com</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Phone</span>
+                            <span class="detail-value" data-field="phone">Not provided</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Date of Birth</span>
+                            <span class="detail-value" data-field="dob">Not provided</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-group" id="educationInfo">
+                        <h3>
+                            <span><i class="fas fa-graduation-cap"></i> Education</span>
+                            <button class="edit-btn" onclick="toggleEdit('educationInfo')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </h3>
+                        <div class="detail-item">
+                            <span class="detail-label">Degree</span>
+                            <span class="detail-value" data-field="degree">Not provided</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">University</span>
+                            <span class="detail-value" data-field="university">Not provided</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Year</span>
+                            <span class="detail-value" data-field="year">Not provided</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-group" id="professionalInfo">
+                        <h3>
+                            <span><i class="fas fa-briefcase"></i> Professional</span>
+                            <button class="edit-btn" onclick="toggleEdit('professionalInfo')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </h3>
+                        <div class="detail-item">
+                            <span class="detail-label">Occupation</span>
+                            <span class="detail-value" data-field="occupation">Not provided</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Company</span>
+                            <span class="detail-value" data-field="company">Not provided</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">Experience</span>
+                            <span class="detail-value" data-field="experience">Not provided</span>
+                        </div>
+                    </div>
+
+                    <div class="detail-group" id="addressInfo">
+                        <h3>
+                            <span><i class="fas fa-map-marker-alt"></i> Address</span>
+                            <button class="edit-btn" onclick="toggleEdit('addressInfo')">
+                                <i class="fas fa-edit"></i> Edit
+                            </button>
+                        </h3>
+                        <div class="detail-item">
+                            <span class="detail-label">City</span>
+                            <span class="detail-value" data-field="city">Not provided</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">State</span>
+                            <span class="detail-value" data-field="state">Not provided</span>
+                        </div>
+                        <div class="detail-item">
+                            <span class="detail-label">PIN Code</span>
+                            <span class="detail-value" data-field="pincode">Not provided</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Auth Modal -->
+    <div class="modal" id="authModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeAuthModal()">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon">
+                    <i class="fas fa-user"></i>
+                </div>
+                <h2>Welcome to CredHub</h2>
+                <p>Manage your credentials securely</p>
+            </div>
+
+            <div class="auth-tabs">
+                <button class="auth-tab active" id="loginTab" onclick="switchAuthTab('login')">Sign In</button>
+                <button class="auth-tab" id="signupTab" onclick="switchAuthTab('signup')">Sign Up</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="loginEmail" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="loginPassword" required placeholder="Enter your password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-sign-in-alt"></i> Sign In
+                </button>
+            </form>
+
+            <!-- Signup Form -->
+            <form id="signupForm" style="display: none;" onsubmit="handleSignup(event)">
+                <div class="form-group">
+                    <label>Full Name</label>
+                    <input type="text" id="signupName" required placeholder="Enter your full name">
+                </div>
+                <div class="form-group">
+                    <label>Email Address</label>
+                    <input type="email" id="signupEmail" required placeholder="Enter your email">
+                </div>
+                <div class="form-group">
+                    <label>Phone Number</label>
+                    <input type="tel" id="signupPhone" required placeholder="Enter your phone number">
+                </div>
+                <div class="form-group">
+                    <label>Password</label>
+                    <input type="password" id="signupPassword" required placeholder="Create a password" minlength="6">
+                </div>
+                <div class="form-group">
+                    <label>Confirm Password</label>
+                    <input type="password" id="signupConfirmPassword" required placeholder="Confirm your password">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                    <i class="fas fa-user-plus"></i> Create Account
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- DigiLocker Verification Modal -->
+    <div class="modal" id="verifyModal">
+        <div class="modal-content">
+            <button class="modal-close" onclick="closeVerifyModal()">&times;</button>
+            <div class="modal-header">
+                <div class="modal-icon" id="verifyModalIcon">
+                    <i class="fas fa-id-card"></i>
+                </div>
+                <h2 id="verifyModalTitle">Verify Document</h2>
+                <p id="verifyModalDesc">Enter your document details for verification</p>
+            </div>
+
+            <form id="verifyForm" onsubmit="handleVerification(event)">
+                <div class="form-group">
+                    <label id="docNumberLabel">Document Number</label>
+                    <input type="text" id="docNumber" required placeholder="Enter document number">
+                    <small id="docNumberHint">Enter your 12-digit Aadhaar number</small>
+                </div>
+
+                <div class="form-group">
+                    <label>Your Name (as on document)</label>
+                    <input type="text" id="docHolderName" required placeholder="Enter name as on document">
+                </div>
+
+                <button type="button" class="btn btn-secondary" style="width: 100%; justify-content: center; margin-bottom: 1rem;" onclick="sendOTP()">
+                    <i class="fas fa-paper-plane"></i> Send OTP
+                </button>
+
+                <div class="otp-section" id="otpSection">
+                    <div class="otp-info">
+                        <i class="fas fa-check-circle"></i>
+                        <span>OTP sent to your registered mobile number</span>
+                    </div>
+                    <div class="form-group">
+                        <label>Enter OTP</label>
+                        <input type="text" id="otpInput" required placeholder="Enter 6-digit OTP" maxlength="6" pattern="[0-9]{6}">
+                        <small>For demo, use OTP: <strong>123456</strong></small>
+                    </div>
+                    <button type="submit" class="btn btn-primary" style="width: 100%; justify-content: center;">
+                        <i class="fas fa-shield-alt"></i> Verify Document
+                    </button>
+                </div>
+            </form>
+        </div>
+    </div>
+
+    <script>
+        // ==================== DATA STORAGE ====================
+        let currentUser = null;
+        let userData = {
+            fullName: 'Guest User',
+            email: 'guest@example.com',
+            phone: '',
+            dob: '',
+            degree: '',
+            university: '',
+            year: '',
+            occupation: '',
+            company: '',
+            experience: '',
+            city: '',
+            state: '',
+            pincode: ''
+        };
+
+        // DigiLocker Documents Configuration
+        const digiLockerDocuments = [
+            { id: 'aadhaar', name: 'Aadhaar Card', icon: 'fa-id-card', numberLabel: 'Aadhaar Number', hint: 'Enter your 12-digit Aadhaar number', pattern: '^[0-9]{12}$', placeholder: 'XXXX XXXX XXXX' },
+            { id: 'pan', name: 'PAN Card', icon: 'fa-id-badge', numberLabel: 'PAN Number', hint: 'Enter your 10-character PAN (e.g., ABCDE1234F)', pattern: '^[A-Z]{5}[0-9]{4}[A-Z]{1}$', placeholder: 'ABCDE1234F' },
+            { id: 'driving', name: 'Driving License', icon: 'fa-car', numberLabel: 'License Number', hint: 'Enter your driving license number', pattern: '.{10,}', placeholder: 'DL-XXXXXXXXXX' },
+            { id: 'class10', name: 'Class 10 Certificate', icon: 'fa-graduation-cap', numberLabel: 'Roll Number', hint: 'Enter your Class 10 roll number', pattern: '.{5,}', placeholder: 'Roll Number' },
+            { id: 'class12', name: 'Class 12 Certificate', icon: 'fa-graduation-cap', numberLabel: 'Roll Number', hint: 'Enter your Class 12 roll number', pattern: '.{5,}', placeholder: 'Roll Number' },
+            { id: 'passport', name: 'Passport', icon: 'fa-passport', numberLabel: 'Passport Number', hint: 'Enter your passport number (e.g., A1234567)', pattern: '^[A-Z][0-9]{7}$', placeholder: 'A1234567' }
+        ];
+
+        let verifiedDocuments = {};
+        let currentVerifyingDoc = null;
+        let otpSent = false;
+
+        // ==================== INITIALIZATION ====================
+        window.addEventListener('load', function() {
+            loadUserData();
+            renderDigiLockerDocs();
+            updateAllDisplays();
+        });
+
+        function loadUserData() {
+            const savedUser = localStorage.getItem('credHubCurrentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                const savedData = localStorage.getItem('credHubUserData_' + currentUser.email);
+                if (savedData) {
+                    userData = JSON.parse(savedData);
+                }
+                const savedDocs = localStorage.getItem('credHubVerifiedDocs_' + currentUser.email);
+                if (savedDocs) {
+                    verifiedDocuments = JSON.parse(savedDocs);
+                }
+            }
+        }
+
+        function saveUserData() {
+            if (currentUser) {
+                localStorage.setItem('credHubUserData_' + currentUser.email, JSON.stringify(userData));
+                localStorage.setItem('credHubVerifiedDocs_' + currentUser.email, JSON.stringify(verifiedDocuments));
+            }
+        }
+
+        // ==================== NAVIGATION ====================
+        function showPage(pageName) {
+            document.querySelectorAll('.page').forEach(page => page.classList.remove('active'));
+            document.querySelectorAll('.nav-link').forEach(link => link.classList.remove('active'));
+            
+            document.getElementById(pageName + 'Page').classList.add('active');
+            const activeLink = document.querySelector(`.nav-link[data-page="${pageName}"]`);
+            if (activeLink) activeLink.classList.add('active');
+            
+            document.getElementById('navLinks').classList.remove('active');
+            updateAllDisplays();
+        }
+
+        function toggleMobileMenu() {
+            document.getElementById('navLinks').classList.toggle('active');
+        }
+
+        // ==================== AUTH FUNCTIONS ====================
+        function openAuthModal() {
+            if (currentUser) {
+                if (confirm('Do you want to logout?')) {
+                    handleLogout();
+                }
+            } else {
+                document.getElementById('authModal').classList.add('active');
+            }
+        }
+
+        function closeAuthModal() {
+            document.getElementById('authModal').classList.remove('active');
+            document.getElementById('loginForm').reset();
+            document.getElementById('signupForm').reset();
+        }
+
+        function switchAuthTab(tab) {
+            document.getElementById('loginTab').classList.toggle('active', tab === 'login');
+            document.getElementById('signupTab').classList.toggle('active', tab === 'signup');
+            document.getElementById('loginForm').style.display = tab === 'login' ? 'block' : 'none';
+            document.getElementById('signupForm').style.display = tab === 'signup' ? 'block' : 'none';
+        }
+
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+
+            if (email && password.length >= 6) {
+                currentUser = { email: email };
+                localStorage.setItem('credHubCurrentUser', JSON.stringify(currentUser));
+                
+                // Load existing data or set defaults
+                const savedData = localStorage.getItem('credHubUserData_' + email);
+                if (savedData) {
+                    userData = JSON.parse(savedData);
+                } else {
+                    userData.email = email;
+                    userData.fullName = email.split('@')[0];
+                }
+                
+                const savedDocs = localStorage.getItem('credHubVerifiedDocs_' + email);
+                if (savedDocs) {
+                    verifiedDocuments = JSON.parse(savedDocs);
+                } else {
+                    verifiedDocuments = {};
+                }
+
+                closeAuthModal();
+                updateAllDisplays();
+                showPage('dashboard');
+                showToast('Login successful! Welcome back.', 'success');
+            }
+        }
+
+        function handleSignup(event) {
+            event.preventDefault();
+            const name = document.getElementById('signupName').value;
+            const email = document.getElementById('signupEmail').value;
+            const phone = document.getElementById('signupPhone').value;
+            const password = document.getElementById('signupPassword').value;
+            const confirmPassword = document.getElementById('signupConfirmPassword').value;
+
+            if (password !== confirmPassword) {
+                showToast('Passwords do not match!', 'error');
+                return;
+            }
+
+            if (password.length < 6) {
+                showToast('Password must be at least 6 characters!', 'error');
+                return;
+            }
+
+            currentUser = { email: email };
+            userData = {
+                fullName: name,
+                email: email,
+                phone: phone,
+                dob: '',
+                degree: '',
+                university: '',
+                year: '',
+                occupation: '',
+                company: '',
+                experience: '',
+                city: '',
+                state: '',
+                pincode: ''
+            };
+            verifiedDocuments = {};
+
+            localStorage.setItem('credHubCurrentUser', JSON.stringify(currentUser));
+            saveUserData();
+            
+            closeAuthModal();
+            updateAllDisplays();
+            showPage('dashboard');
+            showToast('Account created successfully! Welcome, ' + name + '!', 'success');
+        }
+
+        function handleLogout() {
+            currentUser = null;
+            userData = {
+                fullName: 'Guest User',
+                email: 'guest@example.com',
+                phone: '',
+                dob: '',
+                degree: '',
+                university: '',
+                year: '',
+                occupation: '',
+                company: '',
+                experience: '',
+                city: '',
+                state: '',
+                pincode: ''
+            };
+            verifiedDocuments = {};
+            
+            localStorage.removeItem('credHubCurrentUser');
+            updateAllDisplays();
+            showPage('home');
+            showToast('Logged out successfully!', 'success');
+        }
+
+        // ==================== DIGILOCKER FUNCTIONS ====================
+        function renderDigiLockerDocs() {
+            const container = document.getElementById('digilockerDocs');
+            container.innerHTML = digiLockerDocuments.map(doc => {
+                const isVerified = verifiedDocuments[doc.id];
+                return `
+                    <div class="doc-card ${isVerified ? 'verified' : ''}" onclick="openVerifyModal('${doc.id}')">
+                        <div class="doc-icon">
+                            <i class="fas ${doc.icon}"></i>
+                        </div>
+                        <div class="doc-info">
+                            <div class="doc-name">${doc.name}</div>
+                            <div class="doc-status ${isVerified ? 'verified' : 'pending'}">
+                                <i class="fas ${isVerified ? 'fa-check-circle' : 'fa-clock'}"></i>
+                                ${isVerified ? 'Verified' : 'Click to Verify'}
+                            </div>
+                            ${isVerified ? `<div class="doc-number">****${verifiedDocuments[doc.id].number.slice(-4)}</div>` : ''}
+                        </div>
+                        <div class="doc-action">
+                            <i class="fas ${isVerified ? 'fa-check' : 'fa-arrow-right'}" style="color: ${isVerified ? 'var(--secondary-color)' : 'var(--primary-color)'}"></i>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function openVerifyModal(docId) {
+            if (!currentUser) {
+                showToast('Please sign in to verify documents!', 'error');
+                openAuthModal();
+                return;
+            }
+
+            if (verifiedDocuments[docId]) {
+                showToast('This document is already verified!', 'success');
+                return;
+            }
+
+            const doc = digiLockerDocuments.find(d => d.id === docId);
+            currentVerifyingDoc = doc;
+            otpSent = false;
+
+            document.getElementById('verifyModalIcon').innerHTML = `<i class="fas ${doc.icon}"></i>`;
+            document.getElementById('verifyModalTitle').textContent = `Verify ${doc.name}`;
+            document.getElementById('verifyModalDesc').textContent = `Enter your ${doc.name} details for verification`;
+            document.getElementById('docNumberLabel').textContent = doc.numberLabel;
+            document.getElementById('docNumberHint').textContent = doc.hint;
+            document.getElementById('docNumber').placeholder = doc.placeholder;
+            document.getElementById('docNumber').value = '';
+            document.getElementById('docHolderName').value = userData.fullName !== 'Guest User' ? userData.fullName : '';
+            document.getElementById('otpInput').value = '';
+            document.getElementById('otpSection').classList.remove('active');
+            
+            document.getElementById('verifyModal').classList.add('active');
+        }
+
+        function closeVerifyModal() {
+            document.getElementById('verifyModal').classList.remove('active');
+            document.getElementById('verifyForm').reset();
+            currentVerifyingDoc = null;
+            otpSent = false;
+        }
+
+        function sendOTP() {
+            const docNumber = document.getElementById('docNumber').value.trim();
+            const holderName = document.getElementById('docHolderName').value.trim();
+
+            if (!docNumber) {
+                showToast('Please enter the document number!', 'error');
+                return;
+            }
+
+            if (!holderName) {
+                showToast('Please enter the name as on document!', 'error');
+                return;
+            }
+
+            // Validate document number format
+            const pattern = new RegExp(currentVerifyingDoc.pattern);
+            if (!pattern.test(docNumber.replace(/\s/g, '').toUpperCase())) {
+                showToast('Invalid document number format! ' + currentVerifyingDoc.hint, 'error');
+                return;
+            }
+
+            // Show OTP section
+            otpSent = true;
+            document.getElementById('otpSection').classList.add('active');
+            showToast('OTP sent to your registered mobile number!', 'success');
+        }
+
+        function handleVerification(event) {
+            event.preventDefault();
+
+            if (!otpSent) {
+                showToast('Please send OTP first!', 'error');
+                return;
+            }
+
+            const otp = document.getElementById('otpInput').value.trim();
+            
+            if (otp !== '123456') {
+                showToast('Invalid OTP! Use 123456 for demo.', 'error');
+                return;
+            }
+
+            const docNumber = document.getElementById('docNumber').value.trim().replace(/\s/g, '').toUpperCase();
+            const holderName = document.getElementById('docHolderName').value.trim();
+
+            // Save verified document
+            verifiedDocuments[currentVerifyingDoc.id] = {
+                number: docNumber,
+                name: holderName,
+                verifiedAt: new Date().toISOString()
+            };
+
+            saveUserData();
+            renderDigiLockerDocs();
+            updateAllDisplays();
+            closeVerifyModal();
+            
+            showToast(`${currentVerifyingDoc.name} verified successfully!`, 'success');
+        }
+
+        // ==================== PROFILE FUNCTIONS ====================
+        function toggleEdit(groupId) {
+            const group = document.getElementById(groupId);
+            const editBtn = group.querySelector('.edit-btn');
+            const isEditing = group.classList.contains('editing');
+
+            if (!isEditing) {
+                group.classList.add('editing');
+                editBtn.innerHTML = '<i class="fas fa-save"></i> Save';
+                
+                group.querySelectorAll('.detail-value').forEach(span => {
+                    const field = span.dataset.field;
+                    const currentValue = userData[field] || '';
+                    span.innerHTML = `<input type="text" value="${currentValue}" data-field="${field}">`;
+                });
+            } else {
+                group.classList.remove('editing');
+                editBtn.innerHTML = '<i class="fas fa-edit"></i> Edit';
+                
+                group.querySelectorAll('.detail-value input').forEach(input => {
+                    const field = input.dataset.field;
+                    userData[field] = input.value;
+                });
+                
+                saveUserData();
+                updateAllDisplays();
+                showToast('Profile updated successfully!', 'success');
+            }
+        }
+
+        // ==================== FILE UPLOAD ====================
+        function toggleUploadSection() {
+            const section = document.getElementById('uploadSection');
+            section.style.display = section.style.display === 'none' ? 'block' : 'none';
+        }
+
+        function handleFileUpload(event) {
+            const file = event.target.files[0];
+            if (file) {
+                showToast(`File "${file.name}" uploaded successfully!`, 'success');
+                document.getElementById('uploadSection').style.display = 'none';
+            }
+        }
+
+        // ==================== UPDATE DISPLAYS ====================
+        function updateAllDisplays() {
+            // Update auth button
+            const authBtn = document.getElementById('authBtn');
+            if (currentUser) {
+                const firstName = userData.fullName.split(' ')[0] || 'User';
+                authBtn.innerHTML = `<i class="fas fa-user"></i> ${firstName}`;
+            } else {
+                authBtn.innerHTML = '<i class="fas fa-sign-in-alt"></i> Sign In';
+            }
+
+            // Update dashboard
+            const firstName = userData.fullName.split(' ')[0] || 'User';
+            document.getElementById('dashboardUserName').textContent = firstName;
+            
+            const verifiedCount = Object.keys(verifiedDocuments).length;
+            document.getElementById('totalCredentials').textContent = verifiedCount;
+            document.getElementById('verifiedDocs').textContent = verifiedCount;
+            document.getElementById('pendingDocs').textContent = 6 - verifiedCount;
+            document.getElementById('digilockerStatus').textContent = verifiedCount > 0 ? 'Connected' : 'Not Connected';
+
+            // Update DigiLocker stats
+            document.getElementById('verifiedCount').textContent = verifiedCount;
+            document.getElementById('pendingCount').textContent = 6 - verifiedCount;
+            
+            const connectionStatus = document.getElementById('connectionStatus');
+            if (verifiedCount > 0) {
+                connectionStatus.className = 'status-badge status-connected';
+                connectionStatus.innerHTML = '<i class="fas fa-check-circle"></i> Connected';
+            } else {
+                connectionStatus.className = 'status-badge status-disconnected';
+                connectionStatus.innerHTML = '<i class="fas fa-times-circle"></i> Not Connected';
+            }
+
+            // Update profile
+            document.getElementById('profileName').textContent = userData.fullName || 'Guest User';
+            document.getElementById('profileEmail').textContent = userData.email || 'guest@example.com';
+            
+            const initials = (userData.fullName || 'GU').split(' ').map(n => n[0]).join('').toUpperCase().slice(0, 2);
+            document.getElementById('profileAvatar').textContent = initials;
+
+            // Update profile fields
+            document.querySelectorAll('.detail-value[data-field]').forEach(span => {
+                const field = span.dataset.field;
+                if (!span.querySelector('input')) {
+                    span.textContent = userData[field] || 'Not provided';
+                }
+            });
+
+            // Update credentials list
+            renderCredentialsList();
+            
+            // Update recent credentials on dashboard
+            renderRecentCredentials();
+        }
+
+        function renderCredentialsList() {
+            const container = document.getElementById('credentialsList');
+            const verified = Object.entries(verifiedDocuments);
+            
+            if (verified.length === 0) {
+                container.innerHTML = `
+                    <p style="color: var(--text-color); grid-column: 1/-1; text-align: center; padding: 3rem; background: white; border-radius: var(--border-radius);">
+                        <i class="fas fa-folder-open" style="font-size: 3rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                        No credentials verified yet.<br>
+                        <a href="#" onclick="showPage('digilocker')" style="color: var(--primary-color);">Go to DigiLocker</a> to verify your documents.
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = verified.map(([docId, data]) => {
+                const doc = digiLockerDocuments.find(d => d.id === docId);
+                return `
+                    <div class="credential-card">
+                        <div class="credential-header">
+                            <h3><i class="fas ${doc.icon}"></i> ${doc.name}</h3>
+                            <p style="opacity: 0.9;">DigiLocker</p>
+                        </div>
+                        <div class="credential-body">
+                            <p><strong>Name:</strong> ${data.name}</p>
+                            <p><strong>Number:</strong> ****${data.number.slice(-4)}</p>
+                            <div class="credential-meta">
+                                <span class="badge badge-verified"><i class="fas fa-check-circle"></i> Verified</span>
+                                <span>${new Date(data.verifiedAt).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        function renderRecentCredentials() {
+            const container = document.getElementById('recentCredentials');
+            const verified = Object.entries(verifiedDocuments).slice(0, 3);
+            
+            if (verified.length === 0) {
+                container.innerHTML = `
+                    <p style="color: var(--text-color); grid-column: 1/-1; text-align: center; padding: 2rem;">
+                        <i class="fas fa-folder-open" style="font-size: 2rem; margin-bottom: 1rem; display: block; opacity: 0.5;"></i>
+                        No credentials yet. Start by verifying documents in DigiLocker!
+                    </p>
+                `;
+                return;
+            }
+
+            container.innerHTML = verified.map(([docId, data]) => {
+                const doc = digiLockerDocuments.find(d => d.id === docId);
+                return `
+                    <div class="credential-card">
+                        <div class="credential-header">
+                            <h3><i class="fas ${doc.icon}"></i> ${doc.name}</h3>
+                            <p style="opacity: 0.9;">DigiLocker</p>
+                        </div>
+                        <div class="credential-body">
+                            <p><strong>Holder:</strong> ${data.name}</p>
+                            <div class="credential-meta">
+                                <span class="badge badge-verified"><i class="fas fa-check-circle"></i> Verified</span>
+                                <span>${new Date(data.verifiedAt).toLocaleDateString()}</span>
+                            </div>
+                        </div>
+                    </div>
+                `;
+            }).join('');
+        }
+
+        // ==================== TOAST NOTIFICATION ====================
+        function showToast(message, type = 'success') {
+            const toast = document.getElementById('toast');
+            const toastMessage = document.getElementById('toastMessage');
+            
+            toast.className = 'toast active ' + type;
+            toastMessage.textContent = message;
+            
+            setTimeout(() => {
+                toast.classList.remove('active');
+            }, 3000);
+        }
+
+        // ==================== MODAL CLOSE ON OUTSIDE CLICK ====================
+        window.addEventListener('click', function(event) {
+            if (event.target.classList.contains('modal')) {
+                event.target.classList.remove('active');
+            }
+        });
+    </script>
+</body>
+</html>
