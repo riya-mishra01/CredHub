@@ -3,7 +3,7 @@
 CredHub is a frontend website designed to manage micro-credentials, certifications, and achievements in one place.
 
 ## Live Demo
-Link: https://misra7060-ux.github.io/CredHub/
+Link: https://riya-mishra01.github.io/CredHub/
 
 ## Key Features
 - DigiLocker Integration: Seamless connection to access government-issued documents.
